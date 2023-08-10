@@ -1,78 +1,3 @@
-# import tkinter
-# from tkinter import *
-# from tkinter import ttk
-# from tkinter import messagebox
-#
-# window = Tk()
-# window.title('Судоку')
-# window.geometry('350x300')
-#
-# frame = Frame(window, borderwidth=1, highlightcolor='black')
-# frame.pack(padx=10, pady=10)
-#
-# table = Grid(frame)
-# table.pack()
-#
-# # for i in range(9): window.columnconfigure(index=i, weight=1)
-# # for i in range(9): window.rowconfigure(index=i, weight=1)
-#
-# for i in range(9):
-#     for j in range(9):
-#         btn = ttk.Entry(text=f'{i} {j}')
-#         btn.grid(row=i, column=j, padx=2, pady=2, ipadx=5, ipady=5)
-#
-#
-#
-# window.mainloop()
-
-
-#
-# import tkinter as tk
-# from tkinter import ttk
-#
-# root = tk.Tk()
-#
-# # Создание рамки
-# frame = tk.Frame(root, borderwidth=1, highlightbackground="black")
-# frame.pack(padx=20, pady=20)
-#
-# # Создание таблицы внутри рамки
-# table = ttk.Treeview(frame)
-# table.pack()
-#
-# # Добавление столбцов
-# table["columns"] = ("1", "2", "3")
-#
-# # Установка ширины столбцов
-# table.column("#0", width=50, minwidth=50)
-# table.column("1", width=100, minwidth=50)
-# table.column("2", width=100, minwidth=50)
-# table.column("3", width=100, minwidth=50)
-#
-# # Установка заголовков столбцов
-# table.heading("#0", text="Column 1")
-# table.heading("1", text="Column 2")
-# table.heading("2", text="Column 3")
-# table.heading("3", text="Column 4")
-#
-# # Добавление элементов в таблицу
-# for i in range(3):
-#     table.insert("", index=i, values=("Value 1", "Value 2", "Value 3"))
-#
-# root.mainloop()
-
-
-# matrix_input = [[0 for j in range(9)] for _ in range(9)]
-
-# matrix_input = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0, 0, 0, 0, 0]]
 import os
 
 matrix_input = [[0, 6, 0, 3, 0, 8, 0, 0, 0],
@@ -210,4 +135,4 @@ print_chek_matr(matrix_input)
 matrix_working = filling_matrix(matrix_working)
 print_matr(matrix_working)
 
-#os.system('PAUSE')
+os.system('PAUSE')
