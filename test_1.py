@@ -98,6 +98,9 @@ def entry_unfocus(event):
         entry.focus()
 
 
+def entry_focus(event):
+    entry.delete(0, END)
+
 check = (root.register(is_valid), '%P', '%V')
 
 errmsg = StringVar()
@@ -112,10 +115,13 @@ label_2.config(text='2 Label', font=14)
 label_2.place(x=280, y=30)
 
 entry = ttk.Entry()
+entry.insert(0,  'i')
 entry.config(font=14, width=3, justify='center')
 entry.config(validate='key', validatecommand=check)
 entry.place(x=65, y=130)
+entry.bind('<FocusIn>', entry_focus)
 entry.bind('<FocusOut>', entry_unfocus)
+
 
 
 btn = ttk.Button()
