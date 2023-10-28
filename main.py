@@ -24,6 +24,11 @@ sp_entry = []
 frame_main = Frame(width=454, height=454, borderwidth=2, relief=SOLID)
 frame_main.place(x=5, y=5)
 
+class FrameCube():
+    sp_entry = []
+
+
+    pass
 
 def create_frame_cube_1(frame, x_size, y_size):     # создание Frame 1 стиля
     frame_cube = Frame(frame, width=x_size, height=y_size, borderwidth=1, relief=SOLID)

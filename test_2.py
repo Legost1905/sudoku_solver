@@ -1,150 +1,165 @@
+"""
+
+GUI:    The GUI is made with tkinter.
+        The Grid is displayed with a 9x9 Matrix of Entry, gray and white colored and positioned with .grid()
+        No Buttons, 1 Menu with 'File' cascade and 3 commands: 'Exit', 'Solve' and 'Clear'
+        It reset the cell if it's not inserted 1-9 number
+
+ALGORITHM - BRUTE FORCE:
+        Starts setting to 0 all empty cells
+        Search the next cell to fill checking if is equal to 0
+        Tries 1-9 numbers until it finds the first correct one for that cell and puts the number into it
+        If going along it will find an error, it will recoursively delete all the inserted cells
+        It restarts the algorithm and repeats it until finds the correct numbers
+
+"""
+
 from tkinter import *
-from tkinter import ttk
-from tkinter import font
-from module_1 import solve_matrix, squadrone_matrix, print_check_matr, create_matrix_working
-import re
 
-# создаем само окно, указываем название и размеры окна
 root = Tk()
-root.title('Решатель судоку')
-root.geometry('600x464+500+300')
-root.resizable(FALSE, FALSE)
-
-# указываем используемые шрифты
-font1 = font.Font(family='Colibry', size=20, weight='normal', slant='roman')
-font2 = font.Font(family='Colibry', size=14, weight='normal', slant='roman')
-# используемые размеры для внутренних окон
-size_big = 150
-size_small = 50
-
-# задаем массив входных данных таблицы
-sp_entry = []
-
-# внешняя рамка судоку-таблицы
-frame_main = Frame(width=454, height=454, borderwidth=2, relief=SOLID)
-frame_main.place(x=5, y=5)
+root.geometry('275x283')
 
 
-def create_frame_cube_1(frame, x_size, y_size):     # создание Frame 1 стиля
-    frame_cube = Frame(frame, width=x_size, height=y_size, borderwidth=1, relief=SOLID)
-    return frame_cube
+# Solve the Sudoku
+class SolveSudoku():
+
+    def __init__(self):
+        self.allZero()
+        self.startSolution()
+
+    # Set the empty cells to 0
+    def allZero(self):
+        for i in range(9):
+            for j in range(9):
+                if savedNumbers[i][j].get() not in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                    savedNumbers[i][j].set(0)
+
+    # Start the Algorithm
+    def startSolution(self, i=0, j=0):
+        i, j = self.findNextCellToFill(i, j)
+
+        # If i == -1 the position is Ok or the Sudoku is Solved
+        if i == -1:
+            return True
+        for e in range(1, 10):
+            if self.isValid(i, j, e):
+                savedNumbers[i][j].set(e)
+                if self.startSolution(i, j):
+                    return True
+                # Undo the current cell for backtracking
+                savedNumbers[i][j].set(0)
+        return False
+
+    # Search the Nearest Cell to fill
+    def findNextCellToFill(self, i, j):
+
+        for x in range(i, 9):
+            for y in range(j, 9):
+                if savedNumbers[x][y].get() == '0':
+                    return x, y
+
+        for x in range(0, 9):
+            for y in range(0, 9):
+                if savedNumbers[x][y].get() == '0':
+                    return x, y
+
+        return -1, -1
+
+    # Check the Validity of savedNumbers[i][j]
+    def isValid(self, i, j, e):
+
+        for x in range(9):
+            if savedNumbers[i][x].get() == str(e):
+                return False
+
+        for x in range(9):
+            if savedNumbers[x][j].get() == str(e):
+                return False
+
+        # Finding the Top x,y Co-ordinates of the section containing the i,j cell    
+        secTopX, secTopY = 3 * int((i / 3)), 3 * int((j / 3))
+        for x in range(secTopX, secTopX + 3):
+            for y in range(secTopY, secTopY + 3):
+                if savedNumbers[x][y].get() == str(e):
+                    return False
+
+        return True
 
 
-def create_frame_cube_2(frame, x_size, y_size):     # создание Frame 2 стиля
-    frame_cube = ttk.Frame(frame, width=x_size, height=y_size, borderwidth=6, relief=SOLID, padding=0)
-    return frame_cube
+class Launch():
+
+    # Set Title, Grid and Menu
+    def __init__(self, master):
+
+        # Title and settings
+        self.master = master
+        master.title("Sudoku Solver")
+
+        font = ('Arial', 18)
+        color = 'white'
+        px, py = 0, 0
+
+        # Front-end Grid
+        self.__table = []
+        for i in range(1, 10):
+            self.__table += [[0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+        for i in range(0, 9):
+            for j in range(0, 9):
+
+                if (i < 3 or i > 5) and (j < 3 or j > 5):
+                    color = 'gray'
+                elif i in [3, 4, 5] and j in [3, 4, 5]:
+                    color = 'gray'
+                else:
+                    color = 'white'
+
+                self.__table[i][j] = Entry(master, width=2, font=font, bg=color, cursor='arrow', borderwidth=0,
+                                           highlightcolor='yellow', highlightthickness=1, highlightbackground='black',
+                                           textvar=savedNumbers[i][j])
+                self.__table[i][j].bind('<Motion>', self.correctGrid)
+                self.__table[i][j].bind('<FocusIn>', self.correctGrid)
+                self.__table[i][j].bind('<Button-1>', self.correctGrid)
+                self.__table[i][j].grid(row=i, column=j)
+
+        # Front-End Menu
+        menu = Menu(master)
+        master.config(menu=menu)
+
+        file = Menu(menu)
+        menu.add_cascade(label='File', menu=file)
+        file.add_command(label='Exit', command=master.quit)
+        file.add_command(label='Solve', command=self.solveInput)
+        file.add_command(label='Clear', command=self.clearAll)
+
+    # Correct the Grid if inputs are uncorrect
+    def correctGrid(self, event):
+        for i in range(9):
+            for j in range(9):
+                if savedNumbers[i][j].get() == '':
+                    continue
+                if len(savedNumbers[i][j].get()) > 1 or savedNumbers[i][j].get() not in ['1', '2', '3', '4', '5', '6',
+                                                                                         '7', '8', '9']:
+                    savedNumbers[i][j].set('')
+
+    # Clear the Grid
+    def clearAll(self):
+        for i in range(9):
+            for j in range(9):
+                savedNumbers[i][j].set('')
+
+    # Calls the class SolveSudoku
+    def solveInput(self):
+        solution = SolveSudoku()
 
 
-def is_valid(temp, op):     # проверка на валидность входного значения
-    result = re.match("^\d{0,1}$", temp) is not None
-    return result
+# Global Matrix where are stored the numbers
+savedNumbers = []
+for i in range(1, 10):
+    savedNumbers += [[0, 0, 0, 0, 0, 0, 0, 0, 0]]
+for i in range(0, 9):
+    for j in range(0, 9):
+        savedNumbers[i][j] = StringVar(root)
 
-
-# def entry_unfocus(event):
-#     result = entry.get()
-#     if str(result) == '0':
-#         entry.delete(0, END)
-#         entry.focus()
-# entry.bind('<FocusOut>', entry_unfocus)
-
-def create_matrix_from_sp(sp):    # создание матрицы 9х9 из массива в 81 элемент
-    # задаем счетчики для строки и столбца матрицы
-    # идем по массиву и заполняем матрицу
-    # на выходе квадрируем матрицу
-
-    new_sp = [[0 for _ in range(9)] for _ in range(9)]
-    counter_j = 0
-    counter_i = 0
-    for elem in sp:
-        if counter_j == 9:
-            counter_j = 0
-            counter_i += 1
-        new_sp[counter_i][counter_j] = elem
-        counter_j += 1
-    return new_sp
-
-
-def create_sp_from_matrix(sp):      # создание массива в 81 элемент из матрицы 9х9
-    new_sp = []
-    for i in range(9):
-        for j in range(9):
-            new_sp.append(sp[i][j])
-    return new_sp
-
-
-def matrix_entry_input(sp):     # считывание полей Entry
-    # на входе имеем массив полей Entry
-    # если поле Entry не пустое, считываем значение
-    # иначе присваиваем 0
-    # на выходе преобразовываем массив в матрицу
-
-    sp_exit = []
-    for i in range(81):
-        temp = sp[i].get()
-        if temp:
-            sp_exit.append(int(temp))
-        else:
-            sp_exit.append(0)
-    return create_matrix_from_sp(sp_exit)
-
-
-def matrix_entry_output(sp):    # заполнение полей Entry
-    # функция работает с глобальным массивом полей Entry
-
-    for i in range(81):
-        temp = sp_entry[i].get()
-        if not temp:
-            sp_entry[i].insert(0, str(sp[i]))
-        else:
-            sp_entry[i].config(state='disabled')
-
-def btn_command_1():    # получить решение судоку
-    # получаем матрицу входных значений и квадрируем ее
-    # получаем решение судоку-таблицы
-    # квадрируем решение и получаем список для массива Entry
-    # заполняем поля Entry
-
-    matrix_result = squadrone_matrix(matrix_entry_input(sp_entry))
-    matrix = solve_matrix(matrix_result)
-    sp_result = create_sp_from_matrix(squadrone_matrix(matrix))
-    matrix_entry_output(sp_result)
-
-
-def btn_command_2():    # очистить поле таблицы
-    # очищаем поля Entry
-    # делаем все поля Entry активными
-    # возвращаем фокус на 1-ю ячейку таблицы
-
-    for i in range(81):
-        sp_entry[i].delete(0, END)
-        sp_entry[i].config(state='normal')
-    sp_entry[0].focus()
-    pass
-
-
-check = (root.register(is_valid), '%P', '%V')
-
-for i in range(3):
-    for j in range(3):
-        frame_cube = create_frame_cube_1(frame_main, size_big, size_big)
-        for k in range(3):
-            for l in range(3):
-                frame_sq = create_frame_cube_2(frame_cube, size_small, size_small)
-                entry = Entry(frame_sq, font=font1, width=2, justify=CENTER)
-                entry.config(validate='key', validatecommand=check)
-                entry.pack()
-                sp_entry.append(entry)
-                frame_sq.place(x=l * size_small, y=k * size_small)
-        frame_cube.place(x=j * size_big, y=i * size_big)
-
-btn_1 = Button(text='Получить \n решение', font=font2, command=btn_command_1)
-btn_1.place(x=480, y=20)
-btn_2 = Button(text='Очистить \n таблицу', font=font2, command=btn_command_2)
-btn_2.place(x=480, y=100)
-
-label_1 = Label(text='Сообщение:', font=font2)
-label_1.place(x=475, y=180)
-label_2 = Label(text='-', font=font2, width=10, justify=CENTER)
-label_2.place(x=475, y=210)
-
+app = Launch(root)
 root.mainloop()
